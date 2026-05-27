@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEXUS PDF — O Conhecimento do Futuro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Archivo+Black&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#08060d;
+    --bg-2:#1a0a2e;
+    --purple:#c63dff;
+    --magenta:#ff2bd1;
+    --blue:#4f8fff;
+    --red:#ff2e2e;
+    --text:#f0ecf7;
+    --muted:#8a87a3;
+    --glass:rgba(255,255,255,0.04);
+    --border:rgba(198,61,255,0.35);
+  }
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;overflow-x:hidden;cursor:none}
+  /* Grain texture overlay applied via SVG-data-uri noise */
+  html::before{
+    content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.18;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  body::before{
+    content:'';position:fixed;inset:0;z-index:-2;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(180,79,255,0.18), transparent 50%),
+      radial-gradient(ellipse at 80% 60%, rgba(79,143,255,0.12), transparent 55%),
+      linear-gradient(180deg, var(--bg) 0%, #0d0815 50%, var(--bg) 100%);
+  }
+  body::after{
+    content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(180,79,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(180,79,255,0.06) 1px, transparent 1px);
+    background-size:60px 60px;
+    mask-image:radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+  button{font-family:inherit;cursor:none;border:none;background:none;color:inherit}
+  h1,h2,h3,h4{font-family:'Syne',sans-serif;font-weight:800;letter-spacing:-0.02em;line-height:1.1}
+  .display{font-family:'Archivo Black',sans-serif;font-weight:900;letter-spacing:-0.04em;line-height:0.88;text-transform:uppercase}
+  .container{width:100%;max-width:1240px;margin:0 auto;padding:0 24px}
+
+  /* Cursor */
+  .cursor{position:fixed;width:18px;height:18px;border-radius:50%;background:var(--purple);box-shadow:0 0 18px var(--purple);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .15s ease, background .2s;mix-blend-mode:screen}
+  .cursor.hover{transform:translate(-50%,-50%) scale(1.8);background:var(--blue);box-shadow:0 0 22px var(--blue)}
+  @media (hover:none){.cursor{display:none}html,body,button{cursor:auto}}
+
+  /* Header */
+  header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,0.6);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(180,79,255,0.12)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;letter-spacing:0.04em;display:flex;align-items:center;gap:8px}
+  .logo span{color:var(--purple);text-shadow:0 0 14px var(--purple)}
+  .nav-links{display:flex;gap:36px;list-style:none}
+  .nav-links a{font-size:14px;font-weight:500;color:var(--muted);transition:color .25s}
+  .nav-links a:hover{color:var(--purple)}
+  .nav-right{display:flex;align-items:center;gap:18px}
+  .cart-btn{position:relative;width:44px;height:44px;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;transition:all .25s}
+  .cart-btn:hover{box-shadow:0 0 16px rgba(180,79,255,0.6);border-color:var(--purple)}
+  .cart-btn svg{width:20px;height:20px;stroke:var(--text)}
+  .cart-count{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:11px;font-weight:700;min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;box-shadow:0 0 10px var(--red)}
+  .burger{display:none;flex-direction:column;gap:5px;width:30px;height:30px;justify-content:center;align-items:center}
+  .burger span{width:22px;height:2px;background:var(--text);transition:.3s}
+  .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .burger.open span:nth-child(2){opacity:0}
+  .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+  /* Hero — Portal Rings */
+  .hero{position:relative;padding:170px 0 120px;overflow:hidden;isolation:isolate}
+  .portal{position:absolute;top:50%;left:50%;width:1400px;height:1400px;transform:translate(-50%,-50%);pointer-events:none;z-index:0}
+  .ring{position:absolute;top:50%;left:50%;border-radius:50%;border:1.5px solid;transform:translate(-50%,-50%);opacity:.55}
+  .ring:nth-child(1){width:140px;height:140px;border-color:#ff2bd1;box-shadow:0 0 30px #ff2bd1, inset 0 0 30px rgba(255,43,209,0.5)}
+  .ring:nth-child(2){width:240px;height:240px;border-color:#e030d8;opacity:.7}
+  .ring:nth-child(3){width:360px;height:360px;border-color:#c63dff;opacity:.65}
+  .ring:nth-child(4){width:500px;height:500px;border-color:#a040f0;opacity:.55}
+  .ring:nth-child(5){width:660px;height:660px;border-color:#7d2bcf;opacity:.45}
+  .ring:nth-child(6){width:840px;height:840px;border-color:#5a1fa0;opacity:.35}
+  .ring:nth-child(7){width:1040px;height:1040px;border-color:#3f1675;opacity:.25}
+  .ring:nth-child(8){width:1260px;height:1260px;border-color:#2a0e54;opacity:.18}
+  .portal::before{content:'';position:absolute;top:50%;left:50%;width:140px;height:140px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle, #ff2bd1 0%, #c63dff 40%, transparent 70%);filter:blur(20px);animation:corePulse 3s ease-in-out infinite;z-index:-1}
+  @keyframes corePulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.9}50%{transform:translate(-50%,-50%) scale(1.2);opacity:1}}
+  @keyframes rotate{to{transform:translate(-50%,-50%) rotate(360deg)}}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.15);opacity:.6}}
+
+  .hero-inner{position:relative;z-index:3;text-align:center;max-width:900px;margin:0 auto}
+  .tag-line{display:inline-flex;align-items:center;gap:10px;font-size:12px;letter-spacing:0.5em;text-transform:uppercase;color:#fff;margin-bottom:24px;font-weight:600}
+  .tag-line::before,.tag-line::after{content:'';width:24px;height:1px;background:#fff}
+  .hero h1.display{font-size:clamp(54px,10vw,128px);margin-bottom:28px;color:#fff;text-shadow:0 0 40px rgba(255,43,209,0.6), 0 0 80px rgba(198,61,255,0.4)}
+  .hero h1 .grad{background:linear-gradient(180deg, #fff 0%, #ff2bd1 60%, #c63dff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+  .hero h1 .checker{display:inline-block;vertical-align:middle;width:0.85em;height:0.85em;margin:0 0.05em -0.05em;background-image:linear-gradient(45deg, #ff2e2e 25%, transparent 25%),linear-gradient(-45deg, #ff2e2e 25%, transparent 25%),linear-gradient(45deg, transparent 75%, #ff2e2e 75%),linear-gradient(-45deg, transparent 75%, #ff2e2e 75%);background-size:0.21em 0.21em;background-position:0 0,0 0.105em,0.105em -0.105em,-0.105em 0;background-color:#fff;box-shadow:0 0 22px rgba(255,46,46,0.7);border-radius:3px}
+  .hero p{font-size:17px;color:rgba(255,255,255,0.85);max-width:520px;margin:0 auto 40px;line-height:1.5}
+  .off-badge{display:inline-block;margin-top:36px;padding:18px 36px;border:1.5px solid rgba(255,255,255,0.9);font-family:'Archivo Black',sans-serif;font-size:28px;letter-spacing:0.02em;color:#fff;text-transform:uppercase;background:rgba(0,0,0,0.2);backdrop-filter:blur(4px);box-shadow:0 0 0 1px rgba(255,43,209,0.4), 0 0 30px rgba(255,43,209,0.4)}
+  .off-badge small{display:block;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.3em;opacity:0.85;margin-top:4px}
+  .cta-group{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+  .btn{padding:16px 32px;border-radius:999px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;gap:10px;transition:all .3s;position:relative;overflow:hidden}
+  .btn-primary{background:linear-gradient(90deg, var(--purple), #8a3fe6);color:#fff;box-shadow:0 0 24px rgba(180,79,255,0.5)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(180,79,255,0.8)}
+  .btn-outline{border:1px solid var(--purple);color:var(--text);box-shadow:0 0 14px rgba(180,79,255,0.25) inset}
+  .btn-outline:hover{background:rgba(180,79,255,0.1);box-shadow:0 0 18px rgba(180,79,255,0.5)}
+
+  /* Sections */
+  section{padding:100px 0;position:relative}
+  .section-head{text-align:center;margin-bottom:60px}
+  .section-tag{font-size:12px;letter-spacing:0.4em;color:var(--purple);text-transform:uppercase;margin-bottom:14px}
+  .section-head h2{font-size:clamp(36px,5vw,62px);font-family:'Archivo Black',sans-serif;text-transform:uppercase;letter-spacing:-0.03em}
+  .section-head p{color:var(--muted);max-width:560px;margin:14px auto 0}
+
+  /* Categories */
+  .cats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .cat{padding:32px 24px;border-radius:16px;background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--border);transition:all .3s;position:relative;overflow:hidden}
+  .cat::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg, rgba(180,79,255,0.08), transparent);opacity:0;transition:.3s}
+  .cat:hover{transform:translateY(-4px);border-color:var(--purple);box-shadow:0 0 30px rgba(180,79,255,0.35)}
+  .cat:hover::before{opacity:1}
+  .cat-icon{width:48px;height:48px;border-radius:12px;background:rgba(180,79,255,0.12);display:grid;place-items:center;margin-bottom:18px;border:1px solid var(--border)}
+  .cat-icon svg{width:24px;height:24px;stroke:var(--purple)}
+  .cat h3{font-size:18px;margin-bottom:6px}
+  .cat p{font-size:13px;color:var(--muted)}
+
+  /* Filters */
+  .filters{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:50px}
+  .filter{padding:10px 20px;border-radius:999px;font-size:13px;border:1px solid rgba(180,79,255,0.2);color:var(--muted);transition:.25s}
+  .filter:hover{color:var(--text);border-color:var(--purple)}
+  .filter.active{background:var(--purple);color:#fff;border-color:var(--purple);box-shadow:0 0 18px rgba(180,79,255,0.5)}
+
+  /* Products */
+  .products{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+  .card{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all .35s;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-6px);box-shadow:0 0 40px rgba(180,79,255,0.4);border-color:var(--purple)}
+  .cover{aspect-ratio:3/4;position:relative;overflow:hidden;display:grid;place-items:center;padding:32px;text-decoration:none}
+  .preview-pill{position:absolute;bottom:14px;right:14px;z-index:3;padding:7px 14px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.4);color:#fff;backdrop-filter:blur(6px);opacity:0;transform:translateY(4px);transition:.3s}
+  .card:hover .preview-pill{opacity:1;transform:translateY(0)}
+  .cover::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg, var(--c1), var(--c2));opacity:.85}
+  .cover::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);background-size:30px 30px}
+  .cover-label{position:relative;z-index:2;font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:#fff;text-align:center;letter-spacing:-0.02em;text-shadow:0 2px 20px rgba(0,0,0,0.5)}
+  .tag{position:absolute;top:14px;left:14px;z-index:3;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;background:rgba(10,10,15,0.7);border:1px solid var(--purple);color:var(--purple);box-shadow:0 0 12px rgba(180,79,255,0.4);backdrop-filter:blur(6px)}
+  .card-body{padding:22px;display:flex;flex-direction:column;flex:1}
+  .card-body h3{font-size:19px;margin-bottom:8px}
+  .card-body p{font-size:13px;color:var(--muted);margin-bottom:16px;flex:1}
+  .price{display:flex;align-items:baseline;gap:10px;margin-bottom:16px}
+  .price-old{text-decoration:line-through;color:var(--muted);font-size:13px}
+  .price-new{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:var(--purple);text-shadow:0 0 10px rgba(180,79,255,0.4)}
+  .add-btn{padding:13px;border-radius:12px;border:1px solid var(--border);color:var(--text);font-weight:600;font-size:13px;position:relative;overflow:hidden;transition:.3s;text-transform:uppercase;letter-spacing:0.08em}
+  .add-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg, var(--purple), var(--blue));transform:translateX(-100%);transition:.3s;z-index:-1}
+  .add-btn:hover::before{transform:translateX(0)}
+  .add-btn:hover{border-color:var(--purple);box-shadow:0 0 18px rgba(180,79,255,0.5)}
+  .add-btn.added{animation:shake .5s;background:var(--purple);border-color:var(--purple)}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+  /* Trust */
+  .trust{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+  .trust-item{text-align:center;padding:24px}
+  .trust-icon{width:64px;height:64px;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;margin:0 auto 16px;background:rgba(180,79,255,0.06);box-shadow:0 0 24px rgba(180,79,255,0.18)}
+  .trust-icon svg{width:28px;height:28px;stroke:var(--purple)}
+  .trust-item h4{font-family:'Inter',sans-serif;font-weight:600;font-size:15px;margin-bottom:4px}
+  .trust-item p{font-size:13px;color:var(--muted)}
+
+  /* Why */
+  .why{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+  .why h2{font-size:clamp(30px,3.6vw,46px);margin-bottom:20px}
+  .why > div > p{color:var(--muted);margin-bottom:30px}
+  .why ul{list-style:none;display:flex;flex-direction:column;gap:16px}
+  .why li{display:flex;gap:14px;align-items:flex-start;font-size:15px}
+  .why li svg{flex-shrink:0;width:22px;height:22px;stroke:var(--purple);filter:drop-shadow(0 0 6px var(--purple));margin-top:2px}
+  .why-visual{aspect-ratio:1;position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(135deg, #1a0a2e, #0a0a0f);border:1px solid var(--border);box-shadow:0 0 40px rgba(180,79,255,0.3)}
+  .why-visual::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(180,79,255,0.15) 1px, transparent 1px),linear-gradient(90deg, rgba(180,79,255,0.15) 1px, transparent 1px);background-size:30px 30px;mask-image:radial-gradient(circle at center, black, transparent 75%)}
+  .why-visual::after{content:'';position:absolute;top:50%;left:50%;width:60%;height:60%;transform:translate(-50%,-50%);border-radius:50%;border:1px solid var(--purple);box-shadow:0 0 60px var(--purple) inset, 0 0 60px var(--purple);animation:pulse 3s ease-in-out infinite}
+  .orb{position:absolute;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle at 30% 30%, var(--blue), transparent 70%);top:30%;left:30%;filter:blur(20px);animation:float 6s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-30px)}}
+
+  /* Newsletter */
+  .newsletter{background:linear-gradient(135deg, #1a0a2e 0%, #2a0f4a 100%);border-radius:28px;padding:64px 40px;text-align:center;border:1px solid var(--border);position:relative;overflow:hidden}
+  .newsletter::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(180,79,255,0.08) 1px, transparent 1px),linear-gradient(90deg, rgba(180,79,255,0.08) 1px, transparent 1px);background-size:40px 40px}
+  .newsletter > *{position:relative;z-index:1}
+  .newsletter h2{font-size:clamp(28px,4vw,46px);margin-bottom:14px}
+  .newsletter p{color:var(--muted);margin-bottom:32px}
+  .news-form{display:flex;gap:10px;max-width:520px;margin:0 auto;flex-wrap:wrap;justify-content:center}
+  .news-form input{flex:1;min-width:240px;padding:16px 22px;border-radius:999px;background:rgba(10,10,15,0.6);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:.25s}
+  .news-form input:focus{border-color:var(--purple);box-shadow:0 0 18px rgba(180,79,255,0.5)}
+  .news-form input::placeholder{color:var(--muted)}
+
+  /* Footer */
+  footer{padding:80px 0 32px;border-top:1px solid rgba(180,79,255,0.12);margin-top:60px}
+  .foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:50px;margin-bottom:50px}
+  .foot-grid h4{font-family:'Inter',sans-serif;font-weight:600;font-size:14px;margin-bottom:18px;color:var(--text)}
+  .foot-grid p{font-size:13px;color:var(--muted);margin-top:14px;max-width:280px}
+  .foot-grid ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .foot-grid li a{font-size:13px;color:var(--muted);transition:.2s}
+  .foot-grid li a:hover{color:var(--purple)}
+  .socials{display:flex;gap:10px;margin-top:14px}
+  .socials a{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;transition:.25s}
+  .socials a:hover{border-color:var(--purple);box-shadow:0 0 14px rgba(180,79,255,0.4)}
+  .socials svg{width:16px;height:16px;stroke:var(--text)}
+  .foot-bottom{padding-top:24px;border-top:1px solid rgba(180,79,255,0.1);text-align:center;font-size:12px;color:var(--muted)}
+
+  /* Drawer */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:.3s;z-index:200}
+  .overlay.open{opacity:1;visibility:visible}
+  .drawer{position:fixed;top:0;right:0;width:400px;max-width:90vw;height:100vh;background:#0d0815;border-left:1px solid var(--border);z-index:201;transform:translateX(100%);transition:.35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(180,79,255,0.2)}
+  .drawer.open{transform:translateX(0)}
+  .drawer-head{padding:24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(180,79,255,0.15)}
+  .drawer-head h3{font-size:20px}
+  .close-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;transition:.25s}
+  .close-btn:hover{border-color:var(--red);box-shadow:0 0 12px var(--red)}
+  .close-btn svg{width:16px;height:16px;stroke:var(--text)}
+  .cart-items{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+  .cart-empty{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px}
+  .cart-item{display:flex;gap:14px;padding:14px;background:var(--glass);border:1px solid var(--border);border-radius:12px;align-items:center}
+  .cart-thumb{width:50px;height:60px;border-radius:6px;background:linear-gradient(135deg, var(--purple), var(--blue));flex-shrink:0}
+  .cart-info{flex:1;min-width:0}
+  .cart-info h5{font-size:13px;font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cart-info span{font-size:14px;color:var(--purple);font-weight:700}
+  .remove-btn{color:var(--muted);font-size:18px;padding:4px 8px;transition:.2s}
+  .remove-btn:hover{color:var(--red)}
+  .drawer-foot{padding:24px;border-top:1px solid rgba(180,79,255,0.15)}
+  .total{display:flex;justify-content:space-between;margin-bottom:18px;font-size:16px}
+  .total strong{font-family:'Syne',sans-serif;font-size:22px;color:var(--purple)}
+  .checkout-btn{width:100%;padding:16px;border-radius:12px;background:linear-gradient(90deg, var(--purple), var(--blue));color:#fff;font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:0.1em;box-shadow:0 0 20px rgba(180,79,255,0.5);transition:.3s}
+  .checkout-btn:hover{box-shadow:0 0 32px rgba(180,79,255,0.8)}
+
+  /* Reveal */
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity .8s, transform .8s}
+  .reveal.in{opacity:1;transform:translateY(0)}
+
+  /* Scroll progress bar */
+  .scroll-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg, var(--magenta), var(--purple), var(--blue));z-index:300;width:0%;box-shadow:0 0 12px var(--magenta);transition:width .1s}
+
+  /* Toast */
+  .toast{position:fixed;bottom:30px;left:50%;transform:translate(-50%, 100px);background:rgba(10,8,18,0.95);border:1px solid var(--purple);box-shadow:0 0 30px rgba(198,61,255,0.5);padding:14px 22px;border-radius:14px;color:#fff;font-size:14px;font-weight:500;z-index:400;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px);transition:.4s cubic-bezier(.4,0,.2,1);max-width:90vw}
+  .toast.show{transform:translate(-50%, 0)}
+  .toast .ticon{width:24px;height:24px;border-radius:50%;background:var(--purple);display:grid;place-items:center;flex-shrink:0;box-shadow:0 0 12px var(--purple)}
+  .toast .ticon svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none}
+
+  /* Back to top */
+  .back-top{position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:50%;background:rgba(10,8,18,0.85);border:1px solid var(--border);display:grid;place-items:center;z-index:90;opacity:0;visibility:hidden;transition:.3s;backdrop-filter:blur(10px)}
+  .back-top.show{opacity:1;visibility:visible}
+  .back-top:hover{box-shadow:0 0 22px var(--purple);border-color:var(--purple);transform:translateY(-3px)}
+  .back-top svg{width:18px;height:18px;stroke:var(--text);fill:none;stroke-width:2}
+
+  /* Search bar */
+  .search-wrap{max-width:520px;margin:0 auto 30px;position:relative}
+  .search-input{width:100%;padding:14px 50px 14px 22px;border-radius:999px;background:var(--glass);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:14px;outline:none;backdrop-filter:blur(10px);transition:.25s}
+  .search-input::placeholder{color:var(--muted)}
+  .search-input:focus{border-color:var(--purple);box-shadow:0 0 22px rgba(198,61,255,0.4)}
+  .search-icon{position:absolute;right:20px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted);pointer-events:none}
+
+  /* Quantity controls in cart */
+  .qty{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .qty button{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);color:var(--text);font-size:14px;display:grid;place-items:center;transition:.2s}
+  .qty button:hover{border-color:var(--purple);background:rgba(198,61,255,0.15)}
+  .qty span{min-width:18px;text-align:center;font-size:13px;font-weight:600}
+
+  /* Empty filter state */
+  .no-results{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)}
+  .no-results h3{color:var(--text);margin-bottom:10px;font-family:'Archivo Black',sans-serif}
+
+  /* Cart count pulse */
+  .cart-count.bump{animation:bump .4s}
+  @keyframes bump{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
+
+  /* Card cover hover zoom */
+  .card .cover{transition:transform .5s}
+  .card:hover .cover{transform:scale(1.03)}
+  .cover::before{transition:opacity .4s}
+  .card:hover .cover::before{opacity:1}
+
+  /* Skeleton on load */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .products .card{animation:fadeUp .5s both}
+  .products .card:nth-child(1){animation-delay:.05s}
+  .products .card:nth-child(2){animation-delay:.1s}
+  .products .card:nth-child(3){animation-delay:.15s}
+  .products .card:nth-child(4){animation-delay:.2s}
+  .products .card:nth-child(5){animation-delay:.25s}
+  .products .card:nth-child(6){animation-delay:.3s}
+
+  /* Magnetic button */
+  .btn{transition:transform .3s, box-shadow .3s, background .3s}
+
+  /* Responsive */
+  @media (max-width:980px){
+    .cats{grid-template-columns:repeat(2,1fr)}
+    .products{grid-template-columns:repeat(2,1fr)}
+    .trust{grid-template-columns:repeat(2,1fr)}
+    .why{grid-template-columns:1fr;gap:40px}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:30px}
+  }
+  @media (max-width:768px){
+    .nav-links{position:fixed;top:72px;left:0;right:0;background:rgba(10,10,15,0.95);backdrop-filter:blur(16px);flex-direction:column;padding:30px;gap:20px;border-bottom:1px solid var(--border);transform:translateY(-200%);transition:.35s}
+    .nav-links.open{transform:translateY(0)}
+    .burger{display:flex}
+    .hero{padding:130px 0 70px}
+    section{padding:70px 0}
+  }
+  @media (max-width:480px){
+    .products{grid-template-columns:1fr}
+    .cats{grid-template-columns:1fr}
+    .trust{grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr}
+    .cta-group{flex-direction:column;align-items:stretch}
+    .btn{justify-content:center}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<header>
+  <div class="container nav">
+    <div class="logo">NEXUS<span>PDF</span></div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#inicio">Início</a></li>
+      <li><a href="#catalogo">Catálogo</a></li>
+      <li><a href="#sobre">Sobre</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="cart-btn" id="cartBtn" aria-label="Carrinho">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="inicio">
+  <div class="portal">
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div>
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div>
+  </div>
+  <div class="container hero-inner">
+    <div class="tag-line reveal">PDFs Premium</div>
+    <h1 class="display reveal">O Conhecimento<br>do <span class="grad">Futuro</span><span class="checker"></span><br>Hoje.</h1>
+    <p class="reveal">PDFs exclusivos sobre IA, Web3, tecnologia e tendências que moldam o mundo.</p>
+    <div class="cta-group reveal">
+      <a href="#catalogo" class="btn btn-primary">Ver Catálogo →</a>
+      <a href="#sobre" class="btn btn-outline">Saiba Mais</a>
+    </div>
+    <div class="off-badge reveal">50% OFF<small>em lançamentos</small></div>
+  </div>
+</section>
+
+<section id="categorias">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-tag">// Categorias</div>
+      <h2>Explore por território</h2>
+    </div>
+    <div class="cats">
+      <div class="cat reveal">
+        <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2a4 4 0 0 0-4 4v2H6a4 4 0 0 0 0 8h2v2a4 4 0 0 0 8 0v-2h2a4 4 0 0 0 0-8h-2V6a4 4 0 0 0-4-4z"/><circle cx="12" cy="12" r="2"/></svg></div>
+        <h3>Inteligência Artificial</h3>
+        <p>Modelos, prompts e estratégias</p>
+      </div>
+      <div class="cat reveal">
+        <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+        <h3>Web3 & Blockchain</h3>
+        <p>Cripto, DeFi e descentralização</p>
+      </div>
+      <div class="cat reveal">
+        <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg></div>
+        <h3>Carreira Tech</h3>
+        <p>Trilhas, salários e mercado</p>
+      </div>
+      <div class="cat reveal">
+        <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg></div>
+        <h3>Tendências Globais</h3>
+        <p>Economia, geopolítica, futuro</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="catalogo">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-tag">// Em destaque</div>
+      <h2>PDFs do mês</h2>
+      <p>Conteúdos atualizados pela nossa equipe de pesquisadores e analistas.</p>
+    </div>
+    <div class="search-wrap reveal">
+      <input type="text" class="search-input" id="searchInput" placeholder="Buscar PDFs por título ou tema..." />
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div class="filters reveal">
+      <button class="filter active" data-filter="all">Tudo</button>
+      <button class="filter" data-filter="ia">IA</button>
+      <button class="filter" data-filter="web3">Web3</button>
+      <button class="filter" data-filter="carreira">Carreira</button>
+      <button class="filter" data-filter="tendencias">Tendências</button>
+    </div>
+    <div class="products" id="products"></div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="trust">
+      <div class="trust-item reveal">
+        <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg></div>
+        <h4>Entrega Imediata</h4>
+        <p>Download no ato da compra</p>
+      </div>
+      <div class="trust-item reveal">
+        <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h4>Pagamento Seguro</h4>
+        <p>Criptografia ponta-a-ponta</p>
+      </div>
+      <div class="trust-item reveal">
+        <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>
+        <h4>Conteúdo Atualizado</h4>
+        <p>Revisões trimestrais gratuitas</p>
+      </div>
+      <div class="trust-item reveal">
+        <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <h4>Satisfação Garantida</h4>
+        <p>7 dias de reembolso</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sobre">
+  <div class="container">
+    <div class="why">
+      <div class="reveal">
+        <div class="section-tag">// Por quê</div>
+        <h2>Por que nossos PDFs?</h2>
+        <p>Cada documento é desenvolvido por uma rede de especialistas em tecnologia, ciência e cultura digital. Sem fluff. Direto ao ponto.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Pesquisa rigorosa e fontes verificadas</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Linguagem direta, sem jargão desnecessário</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Casos práticos e templates prontos</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Atualizações gratuitas por 12 meses</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Comunidade exclusiva de leitores</li>
+        </ul>
+      </div>
+      <div class="why-visual reveal"><div class="orb"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="contato">
+  <div class="container">
+    <div class="newsletter reveal">
+      <h2>Fique à frente do futuro</h2>
+      <p>Receba análises semanais sobre tecnologia, IA e tendências globais.</p>
+      <form class="news-form" onsubmit="event.preventDefault();this.querySelector('input').value='';showToast('Inscrição confirmada!')">
+        <input type="email" placeholder="seu@email.com" required />
+        <button type="submit" class="btn btn-primary">Inscrever-se</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <div class="logo">NEXUS<span>PDF</span></div>
+        <p>O futuro do conhecimento em formato digital. Conteúdo premium sobre tecnologia, IA e tendências.</p>
+        <div class="socials">
+          <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+          <a href="#" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h4>Navegação</h4>
+        <ul><li><a href="#inicio">Início</a></li><li><a href="#catalogo">Catálogo</a></li><li><a href="#sobre">Sobre</a></li><li><a href="#contato">Contato</a></li></ul>
+      </div>
+      <div>
+        <h4>Categorias</h4>
+        <ul><li><a href="#">IA</a></li><li><a href="#">Web3</a></li><li><a href="#">Carreira</a></li><li><a href="#">Tendências</a></li></ul>
+      </div>
+      <div>
+        <h4>Suporte</h4>
+        <ul><li><a href="#">FAQ</a></li><li><a href="#">Reembolso</a></li><li><a href="#">Termos</a></li><li><a href="#">Privacidade</a></li></ul>
+      </div>
+    </div>
+    <div class="foot-bottom">Todos os direitos reservados — NEXUS PDF 2026</div>
+  </div>
+</footer>
+
+<div class="scroll-bar" id="scrollBar"></div>
+<button class="back-top" id="backTop" aria-label="Voltar ao topo"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>
+<div class="toast" id="toast"><span class="ticon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span id="toastMsg">Adicionado ao carrinho</span></div>
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>Seu Carrinho</h3>
+    <button class="close-btn" id="closeDrawer"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="drawer-foot">
+    <div class="total"><span>Total:</span><strong id="cartTotal">R$ 0,00</strong></div>
+    <button class="checkout-btn">Finalizar Compra</button>
+  </div>
+</aside>
+
+<script>
+const products = [
+  {id:1, title:"IA para Negócios 2026", desc:"Aplicações práticas de IA em empresas, com cases e ROI.", cat:"ia", old:97, price:47, c1:"#ff2bd1", c2:"#c63dff", file:"pdfs/ia-para-negocios-2026.pdf"},
+  {id:2, title:"Guia Web3 Completo", desc:"Do básico ao avançado: blockchain, DeFi, NFTs e DAOs.", cat:"web3", old:127, price:67, c1:"#ff2e2e", c2:"#c63dff", file:"pdfs/guia-web3-completo.pdf"},
+  {id:3, title:"Prompt Engineering Avançado", desc:"Técnicas premium para extrair o máximo de LLMs.", cat:"ia", old:87, price:39, c1:"#4f8fff", c2:"#c63dff", file:"pdfs/prompt-engineering-avancado.pdf"},
+  {id:4, title:"Futuro do Trabalho", desc:"Carreiras emergentes e habilidades essenciais para 2030.", cat:"carreira", old:77, price:37, c1:"#ff2bd1", c2:"#ff2e2e", file:"pdfs/futuro-do-trabalho.pdf"},
+  {id:5, title:"Segurança Digital", desc:"Proteja dados, identidade e ativos digitais.", cat:"tendencias", old:97, price:49, c1:"#4f8fff", c2:"#ff2bd1", file:"pdfs/seguranca-digital.pdf"},
+  {id:6, title:"Tendências Globais 2026", desc:"Análise geopolítica, econômica e tecnológica do ano.", cat:"tendencias", old:117, price:57, c1:"#c63dff", c2:"#4f8fff", file:"pdfs/tendencias-globais-2026.pdf"}
+];
+const catLabels = {ia:"IA",web3:"Web3",carreira:"Carreira",tendencias:"Tendências"};
+
+const grid = document.getElementById('products');
+let currentFilter = 'all';
+let currentSearch = '';
+
+function renderProducts(){
+  const q = currentSearch.toLowerCase().trim();
+  const filtered = products.filter(p=>{
+    const catOk = currentFilter==='all' || p.cat===currentFilter;
+    const searchOk = !q || p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || catLabels[p.cat].toLowerCase().includes(q);
+    return catOk && searchOk;
+  });
+  if(filtered.length===0){
+    grid.innerHTML = `<div class="no-results"><h3>Nada encontrado</h3><p>Tente outro termo ou outra categoria.</p></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(p=>`
+    <article class="card" data-cat="${p.cat}">
+      <a class="cover" href="${p.file}" target="_blank" rel="noopener" style="--c1:${p.c1};--c2:${p.c2}">
+        <span class="tag">${catLabels[p.cat]}</span>
+        <div class="cover-label">${p.title}</div>
+        <span class="preview-pill">Prévia PDF →</span>
+      </a>
+      <div class="card-body">
+        <h3>${p.title}</h3>
+        <p>${p.desc}</p>
+        <div class="price"><span class="price-old">R$ ${p.old},00</span><span class="price-new">R$ ${p.price},00</span></div>
+        <button class="add-btn" onclick="addToCart(${p.id}, this)">Adicionar ao Carrinho</button>
+      </div>
+    </article>
+  `).join('');
+}
+renderProducts();
+
+document.querySelectorAll('.filter').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.filter').forEach(f=>f.classList.remove('active'));
+    b.classList.add('active');
+    currentFilter = b.dataset.filter;
+    renderProducts();
+  });
+});
+
+const searchInput = document.getElementById('searchInput');
+let searchTimer;
+searchInput.addEventListener('input',e=>{
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(()=>{
+    currentSearch = e.target.value;
+    renderProducts();
+  },150);
+});
+
+// Cart with quantity + localStorage
+let cart = JSON.parse(localStorage.getItem('nexus_cart')||'[]');
+function saveCart(){localStorage.setItem('nexus_cart', JSON.stringify(cart))}
+
+function addToCart(id, btn){
+  const p = products.find(x=>x.id===id);
+  const existing = cart.find(x=>x.id===id);
+  if(existing){ existing.qty += 1; }
+  else { cart.push({id:p.id, title:p.title, price:p.price, c1:p.c1, c2:p.c2, qty:1}); }
+  saveCart();
+  updateCart(true);
+  btn.classList.add('added');
+  const orig = btn.textContent;
+  btn.textContent = '✓ Adicionado';
+  showToast(`"${p.title}" adicionado`);
+  setTimeout(()=>{btn.classList.remove('added');btn.textContent=orig;},1000);
+}
+function changeQty(id, delta){
+  const item = cart.find(x=>x.id===id);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty<=0) cart = cart.filter(x=>x.id!==id);
+  saveCart();
+  updateCart();
+}
+function removeFromCart(id){
+  cart = cart.filter(x=>x.id!==id);
+  saveCart();
+  updateCart();
+}
+function updateCart(bump=false){
+  const count = cart.reduce((s,p)=>s+p.qty,0);
+  const cc = document.getElementById('cartCount');
+  cc.textContent = count;
+  if(bump){cc.classList.remove('bump');void cc.offsetWidth;cc.classList.add('bump');}
+  const items = document.getElementById('cartItems');
+  if(cart.length===0){
+    items.innerHTML = '<div class="cart-empty">Seu carrinho está vazio.<br>Explore nosso catálogo.</div>';
+  } else {
+    items.innerHTML = cart.map(p=>`
+      <div class="cart-item">
+        <div class="cart-thumb" style="background:linear-gradient(135deg,${p.c1},${p.c2})"></div>
+        <div class="cart-info">
+          <h5>${p.title}</h5>
+          <span>R$ ${p.price*p.qty},00</span>
+          <div class="qty">
+            <button onclick="changeQty(${p.id},-1)" aria-label="Diminuir">−</button>
+            <span>${p.qty}</span>
+            <button onclick="changeQty(${p.id},1)" aria-label="Aumentar">+</button>
+          </div>
+        </div>
+        <button class="remove-btn" onclick="removeFromCart(${p.id})" aria-label="Remover">×</button>
+      </div>
+    `).join('');
+  }
+  const total = cart.reduce((s,p)=>s+p.price*p.qty,0);
+  document.getElementById('cartTotal').textContent = `R$ ${total},00`;
+}
+updateCart();
+
+// Toast
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+// Scroll progress + back to top
+const scrollBar = document.getElementById('scrollBar');
+const backTop = document.getElementById('backTop');
+function onScroll(){
+  const y = window.scrollY;
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  scrollBar.style.width = (y/h*100) + '%';
+  backTop.classList.toggle('show', y > 600);
+  const portal = document.querySelector('.portal');
+  if(portal) portal.style.transform = `translate(-50%, calc(-50% + ${y*0.15}px)) scale(${1 + y*0.0004})`;
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+backTop.addEventListener('click',()=>window.scrollTo({top:0, behavior:'smooth'}));
+
+// Keyboard: ESC closes drawer/menu
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    navLinks.classList.remove('open');
+    burger.classList.remove('open');
+  }
+  if((e.ctrlKey||e.metaKey) && e.key==='k'){
+    e.preventDefault();
+    searchInput.focus();
+    searchInput.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+});
+
+// Smooth scroll for anchors
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth', block:'start'})}
+  });
+});
+
+// Checkout button toast
+document.querySelector('.checkout-btn').addEventListener('click',()=>{
+  if(cart.length===0){showToast('Carrinho vazio'); return}
+  showToast('Redirecionando para o pagamento...');
+});
+
+const drawer = document.getElementById('drawer');
+const overlay = document.getElementById('overlay');
+document.getElementById('cartBtn').addEventListener('click',()=>{drawer.classList.add('open');overlay.classList.add('open')});
+document.getElementById('closeDrawer').addEventListener('click',()=>{drawer.classList.remove('open');overlay.classList.remove('open')});
+overlay.addEventListener('click',()=>{drawer.classList.remove('open');overlay.classList.remove('open')});
+
+const burger = document.getElementById('burger');
+const navLinks = document.getElementById('navLinks');
+burger.addEventListener('click',()=>{burger.classList.toggle('open');navLinks.classList.toggle('open')});
+navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{burger.classList.remove('open');navLinks.classList.remove('open')}));
+
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}});
+},{threshold:0.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+const cursor = document.getElementById('cursor');
+let cx=0,cy=0,mx=0,my=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+function loop(){cx+=(mx-cx)*0.25;cy+=(my-cy)*0.25;cursor.style.left=cx+'px';cursor.style.top=cy+'px';requestAnimationFrame(loop)}
+loop();
+document.querySelectorAll('a,button,input').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cursor.classList.add('hover'));
+  el.addEventListener('mouseleave',()=>cursor.classList.remove('hover'));
+});
+
+</script>
+</body>
+</html>
