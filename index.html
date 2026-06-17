@@ -7,7 +7,7 @@
 <meta name="description" content="Estúdio de design de autor de Gabriel Mezzetti. Identidade, sistema e experiência digital — HTML, CSS e JS vanilla, sem frameworks. SP · Remoto Brasil.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0a0a0b;
@@ -34,12 +34,13 @@
 
   /* ---------- NAV ---------- */
   nav{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;justify-content:space-between;
-    padding:20px 32px;background:linear-gradient(180deg,rgba(10,10,11,.92),rgba(10,10,11,0));backdrop-filter:blur(4px)}
-  nav .brand{font-family:var(--display);font-size:22px;font-weight:600;letter-spacing:.04em}
+    padding:20px 32px;background:linear-gradient(180deg,rgba(8,8,9,.96) 0%,rgba(8,8,9,.88) 45%,rgba(8,8,9,.55) 75%,rgba(8,8,9,0) 100%);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  nav .brand{font-family:var(--display);font-size:22px;font-weight:600;letter-spacing:.04em;color:var(--fg)}
   nav .brand sup{color:var(--lime);font-size:.5em;font-family:var(--mono)}
   nav .links{display:flex;gap:30px;align-items:center;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
-  nav .links a{color:var(--muted);transition:color .2s}
-  nav .links a:hover{color:var(--fg)}
+  nav .links a{color:rgba(198,240,0,.88);transition:color .2s,opacity .2s}
+  nav .links a:hover{color:var(--lime);opacity:1}
   nav .cta-btn{border:1px solid var(--line);padding:9px 18px;color:var(--fg)!important;transition:.2s}
   nav .cta-btn:hover{background:var(--lime);color:#000!important;border-color:var(--lime)}
   @media(max-width:760px){nav .links a:not(.cta-btn){display:none}}
@@ -656,7 +657,7 @@
     const canvas=document.getElementById('rain');
     if(!canvas||prefersReduced)return;
     const ctx=canvas.getContext('2d');
-    const glyphs='ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉ01︎+×*#%@=≋✦◇◉アカサタ4096';
+    const glyphs='ابتثجحخدذرزسشصضطظعغفقكلمنهوي٠١٢٣٤٥٦٧٨٩ﻉﻍﻊﺀﺵﺹ4096';
     let cols,drops,speeds,fontSize,W,H,dpr;
 
     function setup(){
@@ -668,28 +669,37 @@
       fontSize=Math.max(18,Math.round(W/55));           // caracteres maiores
       cols=Math.ceil(W/fontSize);
       drops=Array.from({length:cols},()=>Math.random()*-50);
-      speeds=Array.from({length:cols},()=>0.18+Math.random()*0.22); // bem mais lento (antes 1/frame)
+      speeds=Array.from({length:cols},()=>0.09+Math.random()*0.12); // ainda mais lento
     }
     setup();
     window.addEventListener('resize',setup);
+    // garante que a fonte árabe esteja pronta antes de desenhar
+    if(document.fonts&&document.fonts.load){
+      document.fonts.load('600 24px "Noto Sans Arabic"').catch(()=>{});
+    }
 
     let t=0;
     function draw(){
       // rastro mais sutil = caracteres ficam visíveis por mais tempo
       ctx.fillStyle='rgba(10,10,11,.055)';
       ctx.fillRect(0,0,W,H);
-      ctx.font='600 '+fontSize+'px "JetBrains Mono", monospace';
+      ctx.font='600 '+fontSize+'px "Noto Sans Arabic","Geeza Pro","Arial",sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
       for(let i=0;i<cols;i++){
         const x=i*fontSize;
         const y=drops[i]*fontSize;
         const hue=(i*7 + t*0.4)%360;                    // arco-íris suave
         const ch=glyphs[Math.floor(Math.random()*glyphs.length)];
+        ctx.save();
+        ctx.translate(x,y);
+        ctx.rotate(Math.PI/2);                          // gira 90°: letra acompanha a queda
         // corpo do glifo: bem visível
         ctx.fillStyle='hsl('+hue+',95%,65%)';
-        ctx.fillText(ch,x,y);
+        ctx.fillText(ch,0,0);
         // cabeça brilhante na ponta
         ctx.fillStyle='hsl('+hue+',100%,85%)';
-        ctx.fillText(ch,x,y);
+        ctx.fillText(ch,0,0);
+        ctx.restore();
         drops[i]+=speeds[i];                            // velocidade fracionada = mais devagar
         if(y>H && Math.random()>0.99) drops[i]=Math.random()*-25;
       }
